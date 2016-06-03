@@ -1,6 +1,4 @@
 $(document).ready(function(){
-  console.log("helloWorld!!!");
-
 
 var player;
 var computer;
@@ -39,11 +37,11 @@ $('a').click(function() {
 //read the board on each click
 //controls the game
 $('td').click(function() {
-  /* console.log(board1d.indexOf(''));
-  console.log(board1d); */
   if ($(this).html() == "") {
     placePlayer(this.id);
-    computerTactics();
+    /*computerTactics();*/
+    
+    syncBoard();
     isWin();
     //console.log(winMove);
     if (winMove[0] != null) {
@@ -53,9 +51,10 @@ $('td').click(function() {
       //console.log("winMove? " + winMove);
       enemyPlace();
     }
-    //computerTactics();
     isWin();
-    syncBoard();
+    //computerTactics();
+    setTimeout(function(){syncBoard();},400);
+
   }
 })
 
@@ -66,20 +65,26 @@ function enemyPlace(preferred) {
   var enPlace2 = Math.floor(Math.random() * 3);
   //initial enemy placement
   // other enemy placements will be based on logic.
-  if (preferred) {
-    board[preferred[0]][preferred[1]] = computer;
-    //debugger;
-  } else {
     if (enCount <= 2) {
-      if (board[enPlace1][enPlace2] != "") {
+      if (preferred) {
+        //if the preferred placement is not blank clear the preferred movement and choose a random spot
+      if (board[preferred[0]][preferred[1]] != "") {
+        winMove = [];
         enemyPlace();
-      } else {
+      }
+      else{
+        board[preferred[0]][preferred[1]] = computer;
+      }
+    }
+    //if the random placement does not choose a blank spot choose another placement.
+  if (board[enPlace1][enPlace2] != "") {
+        enemyPlace();
+      } 
+      else {
         board[enPlace1][enPlace2] = computer;
         //enCount++;
       }
     }
-
-  }
 }
 
 //logic for the computer to make more tactical moves
@@ -89,6 +94,8 @@ function computerTactics(){
     winMove[1] = 1;
     console.log("Preferred MOVE: " + winMove);
   }
+
+
 }
 
 //syncs the board with the array
@@ -132,8 +139,7 @@ function gameWin() {
   for(var w=0;w<board.length;w++){
     console.log(board[w]);
   }
-//  console.log(board);
-  //debugger;
+
   winMove = [];
   
   board = [
@@ -156,131 +162,116 @@ function gameWin() {
 }
 
 
-// checks to see if someone has won -- checks for potential win moves
 function isWin() {
-  var emptySpace = 0;
-  
-   for(var b=0;b<board.length;b++){
-    for(var a=0;a<board.length;a++){
-      if(board[a][b] === ""){
-        
-        emptySpace++;
-      }        
+
+function hasItem(arr,val){
+  var i,count=0;
+  for(i = 0; i < arr.length;i++){
+    if(arr[i] === val){
+      count++;
     }
   }
-
-  function hasComputer(arr, val) {
-    var i, j,
-        count = 0;
-    for (i = 0, j = arr.length; i < j; i++) {
-        (arr[i] === val) && count++;
-    }
-    return count;
+  return count;
 }
-    
-  winMove = [];
-  //diagnal arrays
-    var leftDown = [board[0][0], board[1][1], board[2][2]];
-    var leftUp = [board[2][0], board[1][1], board[0][2]];
-    var ld = hasComputer(leftDown,computer);
-    var lu = hasComputer(leftUp,computer);
-    var ldp = hasComputer(leftDown,player);
-    var lup = hasComputer(leftUp,player);
-    //win move or preferred moves
-    if (leftDown.indexOf('') >= 0 && ld > 1) {
-      winMove = [];
-      winMove[0] = leftDown.indexOf('');
-      winMove[1] = leftDown.indexOf('');
-      console.log("winMove LD: " + winMove);
-    }
-    if (leftUp.indexOf('') >= 0 && lu > 1) {
-      winMove = [];
-      winMove[0] = leftUp.length - leftUp.indexOf('') - 1;
-      winMove[1] = leftUp.indexOf('');
-      console.log("winMove LU: " + winMove);
-    }
-    if (leftUp.indexOf('') >= 0 && lup > 1 && winMove === []) {
-      winMove = [];
-      winMove[0] = leftUp.length - leftUp.indexOf('') - 1;
-      winMove[1] = leftUp.indexOf('');
-      console.log("Preferred LU: " + winMove);
-    }
-    if (leftDown.indexOf('') >= 0 && ldp > 1 && winMove === []) {
-      winMove = [];
-      winMove[0] = leftDown.indexOf('');
-      winMove[1] = leftDown.indexOf('');
-      console.log("winMove LD: " + winMove);
-    }
+  var leftDown = [board[0][0], board[1][1], board[2][2]];
+  var leftUp = [board[2][0], board[1][1], board[0][2]];
 
+  var ldScore = hasItem(leftDown,player) - hasItem(leftDown, computer);
+  var luScore = hasItem(leftUp,player) - hasItem(leftUp, computer);
+  var blankScore = 0;
+  var cMatch = false;
+  var pMatch = false;
 
-
-  
   for (var l = 0; l < board.length; l++) {
-
-
-    var tempCol = [];
-    var tempRow = [];
-    //creates a temporary array foreach column to check for column win
     var tempCol = [board[0][l], board[1][l], board[2][l]];
     var tempRow = [board[l][0],board[l][1],board[l][2]];
-    
-    var pColScore = hasComputer(tempCol,player);
-    var pRowScore = hasComputer(tempRow,player);
-    var cRowScore = hasComputer(tempRow,computer);  
-    var cColScore = hasComputer(tempCol,computer);
-    
+    var vertScore = hasItem(tempCol,player) - hasItem(tempCol, computer);
+    var horScore = hasItem(tempRow,player) - hasItem(tempRow, computer);
 
-  //does computer win?
-    if (lu == 3 || ld ==3  || cRowScore ==3 || cColScore == 3) {
-        $("#gameMessage").html("You lost  :( ");
-      //debugger;
-        gameWin();
-      }
-    if(pColScore == 3 || pRowScore == 3 || ldp == 3 || lup == 3){
-      $("#gameMessage").html("You won!!! ");
-      gameWin();
-    }    //isTied?
-
-    
-    //win move or preferred moves
-    if (tempCol.indexOf('') >= 0 && cColScore > 1) {
+        //win move or preferred moves -- rows and columns
+    if (tempCol.indexOf('') >= 0 && hasItem(tempCol,computer) === 2) {
       winMove = [];
       winMove[0] = tempCol.indexOf('');
       winMove[1] = l;
       console.log("WINMOVE COL: " + winMove);
     }
-    if (tempRow.indexOf('') >= 0 && cRowScore > 1) {
+    if (tempRow.indexOf('') >= 0 &&hasItem(tempRow,computer) === 2) {
       winMove[0] = l;
       winMove[1] = tempRow.indexOf(""); //index of the empty spot
       console.log("WINMOVE ROW: " + winMove);
     }
-    if (tempRow.indexOf('')>=0 && pRowScore > 1 && winMove === []){
+    if (tempRow.indexOf('')>=0 && hasItem(tempRow,player) === 2 && winMove === []){
       winMove[0] = l;
       winMove[1] = tempRow.indexOf(""); //index of the empty spot
       console.log("Preferred ROW: " + winMove);      
     }
-    if (tempCol.indexOf('') >= 0 && pColScore > 1 && winMove === []) {
+    if (tempCol.indexOf('') >= 0 && hasItem(tempCol,player) === 2 && winMove === []) {
       winMove = [];
       winMove[0] = tempCol.indexOf('');
       winMove[1] = l;
       console.log("Preffered COL: " + winMove);
     }
+
+    if(vertScore == 3 || horScore == 3){
+      pMatch = true;
+    }
+    if(horScore == -3 || vertScore == -3){
+      cMatch = true;
+    }
+
+    blankScore += hasItem(tempRow,"");
   }
-  
-  if(emptySpace<1 && pColScore <3 && pRowScore<3 && ldp <3&& lup <3&&ld<3&&lu<3&&cColScore<3&&cRowScore<3 ){
+
+
+  //do you win?
+  if(pMatch || ldScore == 3 || luScore == 3){
+    
+    $("#gameMessage").html("You won!!! ");
+    setTimeout(function(){gameWin();},400);
+  }
+  //does computer win?
+  else if(cMatch || ldScore == -3 || luScore == -3){
+    $("#gameMessage").html("You lost  :( ");
+    setTimeout(function(){gameWin();},400);
+  }
+  //isTied?
+  if(!cMatch && !pMatch && blankScore == 0){
+    if(ldScore == -1 && luScore == -1 || ldScore == -1 && luScore == 1 || ldScore == 1 && luScore == 1 || ldScore == 1 && luScore == -1){
       $("#gameMessage").html("Tied -- ");
-      gameWin();
+      setTimeout(function(){gameWin();},400);
+    }
   }
-//debugger;
 
-  //debugger;
 
-  
+//diagnal winmoves and blocks
+    if (leftDown.indexOf('') >= 0 && hasItem(leftDown,computer) === 2) {
+      winMove = [];
+      winMove[0] = leftDown.indexOf('');
+      winMove[1] = leftDown.indexOf('');
+      console.log("winMove LD: " + winMove);
+    }
+    if (leftUp.indexOf('') >= 0 && hasItem(leftUp,computer) === 2) {
+      winMove = [];
+      winMove[0] = leftUp.length - leftUp.indexOf('') - 1;
+      winMove[1] = leftUp.indexOf('');
+      console.log("winMove LU: " + winMove);
+    }
+    if (leftUp.indexOf('') >= 0 && hasItem(leftUp,player) === 2 && winMove === []) {
+      winMove = [];
+      winMove[0] = leftUp.length - leftUp.indexOf('') - 1;
+      winMove[1] = leftUp.indexOf('');
+      console.log("Preferred LU: " + winMove);
+    }
+    if (leftDown.indexOf('') >= 0 && hasItem(leftDown,player) === 2 && winMove === []) {
+      winMove = [];
+      winMove[0] = leftDown.indexOf('');
+      winMove[1] = leftDown.indexOf('');
+      console.log("winMove LD: " + winMove);
+    }
+
+
+
+
 }
-
-//steps to making the computer more challenging
-//1. always take win move
-//2. blocking 
-//3. forking
 
 });
