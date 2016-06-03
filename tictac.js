@@ -37,6 +37,7 @@ $('a').click(function() {
 //read the board on each click
 //controls the game
 $('td').click(function() {
+  syncBoard();
   if ($(this).html() == "") {
     placePlayer(this.id);
     /*computerTactics();*/
@@ -53,7 +54,7 @@ $('td').click(function() {
     }
     isWin();
     //computerTactics();
-    setTimeout(function(){syncBoard();},400);
+    setTimeout(function(){syncBoard();},500);
 
   }
 })
@@ -65,6 +66,10 @@ function enemyPlace(preferred) {
   var enPlace2 = Math.floor(Math.random() * 3);
   //initial enemy placement
   // other enemy placements will be based on logic.
+  if(isFull()){
+
+  }
+  else{
     if (enCount <= 2) {
       if (preferred != undefined && preferred.length > 0) {
         //if the preferred placement is not blank clear the preferred movement and choose a random spot
@@ -87,6 +92,22 @@ function enemyPlace(preferred) {
       }
       }
     }
+  }
+}
+
+function isFull(){
+  var count =0;
+  for(var x = 0; x<board.length;x++){
+    if(hasItem(board[x],"")){
+      count++;
+    }
+  }
+  if(count === 0){
+    return true;
+  }
+  else{
+    return false;
+  }
 }
 
 //logic for the computer to make more tactical moves
@@ -162,10 +183,6 @@ function gameWin() {
   }, 1000);
 
 }
-
-
-function isWin() {
-
 function hasItem(arr,val){
   var i,count=0;
   for(i = 0; i < arr.length;i++){
@@ -175,6 +192,10 @@ function hasItem(arr,val){
   }
   return count;
 }
+
+function isWin() {
+
+
   var leftDown = [board[0][0], board[1][1], board[2][2]];
   var leftUp = [board[2][0], board[1][1], board[0][2]];
 
