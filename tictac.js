@@ -45,11 +45,11 @@ $('td').click(function() {
     isWin();
     //console.log(winMove);
     if (winMove[0] != null) {
-      console.log("winMove? Main LOOP: " + winMove);
+      console.log("preferred Move? Main LOOP: " + winMove);
       enemyPlace(winMove);
     } else {
       //console.log("winMove? " + winMove);
-      enemyPlace();
+      enemyPlace(winMove);
     }
     isWin();
     //computerTactics();
@@ -66,23 +66,25 @@ function enemyPlace(preferred) {
   //initial enemy placement
   // other enemy placements will be based on logic.
     if (enCount <= 2) {
-      if (preferred) {
+      if (preferred != undefined && preferred.length > 0) {
         //if the preferred placement is not blank clear the preferred movement and choose a random spot
-      if (board[preferred[0]][preferred[1]] != "") {
-        winMove = [];
-        enemyPlace();
-      }
+        if (board[preferred[0]][preferred[1]] != "") {
+          winMove = [];
+          enemyPlace();
+        }
       else{
         board[preferred[0]][preferred[1]] = computer;
       }
     }
+    else{
     //if the random placement does not choose a blank spot choose another placement.
-  if (board[enPlace1][enPlace2] != "") {
+    if (board[enPlace1][enPlace2] != "") {
         enemyPlace();
       } 
       else {
         board[enPlace1][enPlace2] = computer;
         //enCount++;
+      }
       }
     }
 }
