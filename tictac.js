@@ -40,22 +40,20 @@ $('td').click(function() {
   syncBoard();
   if ($(this).html() == "") {
     placePlayer(this.id);
-    /*computerTactics();*/
-    
     syncBoard();
     isWin();
-    //console.log(winMove);
+    computerTactics();
+
     if (winMove[0] != null) {
       console.log("preferred Move? Main LOOP: " + winMove);
       enemyPlace(winMove);
-    } else {
-      //console.log("winMove? " + winMove);
+    } 
+    else {
       enemyPlace(winMove);
     }
     isWin();
-    //computerTactics();
+    
     setTimeout(function(){syncBoard();},500);
-
   }
 })
 
@@ -71,6 +69,7 @@ function enemyPlace(preferred) {
   }
   else{
     if (enCount <= 2) {
+      //checking that winMove has a value
       if (preferred != undefined && preferred.length > 0) {
         //if the preferred placement is not blank clear the preferred movement and choose a random spot
         if (board[preferred[0]][preferred[1]] != "") {
@@ -117,6 +116,78 @@ function computerTactics(){
     winMove[1] = 1;
     console.log("Preferred MOVE: " + winMove);
   }
+
+  var leftDown = [board[0][0], board[1][1], board[2][2]];
+  var leftUp = [board[2][0], board[1][1], board[0][2]];
+  var isWinMove = false;
+
+
+
+  for(var l = 0; l<board.length; l++){
+    var tempCol = [board[0][l], board[1][l], board[2][l]];
+    var tempRow = [board[l][0],board[l][1],board[l][2]];
+
+
+        //win move or preferred moves -- rows and columns
+    if (tempCol.indexOf('') >= 0 && hasItem(tempCol,computer) === 2) {
+      winMove = [];
+      isWinMove = true;
+      winMove[0] = tempCol.indexOf('');
+      winMove[1] = l;
+      console.log("WINMOVE COL: " + winMove);
+    }
+    if (tempRow.indexOf('') >= 0 &&hasItem(tempRow,computer) === 2) {
+      isWinMove = true;
+      winMove[0] = l;
+      winMove[1] = tempRow.indexOf(""); //index of the empty spot
+      console.log("WINMOVE ROW: " + winMove);
+    }
+
+    if(!isWinMove){
+    if (tempRow.indexOf('')>=0 && hasItem(tempRow,player) === 2){
+      winMove[0] = l;
+      winMove[1] = tempRow.indexOf(""); //index of the empty spot
+      console.log("Preferred ROW: " + winMove);      
+    }
+    if (tempCol.indexOf('') >= 0 && hasItem(tempCol,player) === 2) {
+      winMove = [];
+      winMove[0] = tempCol.indexOf('');
+      winMove[1] = l;
+      console.log("Preferred COL: " + winMove);
+    }
+
+    }
+  }
+
+  if (leftDown.indexOf('') >= 0 && hasItem(leftDown,computer) === 2) {
+    isWinMove = true;
+      winMove = [];
+      winMove[0] = leftDown.indexOf('');
+      winMove[1] = leftDown.indexOf('');
+      console.log("winMove LD: " + winMove);
+    }
+    if (leftUp.indexOf('') >= 0 && hasItem(leftUp,computer) === 2) {
+      isWinMove = true;
+      winMove = [];
+      winMove[0] = leftUp.length - leftUp.indexOf('') - 1;
+      winMove[1] = leftUp.indexOf('');
+      console.log("winMove LU: " + winMove);
+    }
+
+    if(!isWinMove){
+      if (leftUp.indexOf('') >= 0 && hasItem(leftUp,player) === 2) {
+        winMove = [];
+        winMove[0] = leftUp.length - leftUp.indexOf('') - 1;
+        winMove[1] = leftUp.indexOf('');
+        console.log("Preferred LU: " + winMove);
+      }
+      if (leftDown.indexOf('') >= 0 && hasItem(leftDown,player) === 2) {
+        winMove = [];
+        winMove[0] = leftDown.indexOf('');
+        winMove[1] = leftDown.indexOf('');
+        console.log("Preferred LD: " + winMove);
+      }      
+    }
 
 
 }
@@ -183,6 +254,7 @@ function gameWin() {
   }, 1000);
 
 }
+
 function hasItem(arr,val){
   var i,count=0;
   for(i = 0; i < arr.length;i++){
@@ -211,30 +283,6 @@ function isWin() {
     var vertScore = hasItem(tempCol,player) - hasItem(tempCol, computer);
     var horScore = hasItem(tempRow,player) - hasItem(tempRow, computer);
 
-        //win move or preferred moves -- rows and columns
-    if (tempCol.indexOf('') >= 0 && hasItem(tempCol,computer) === 2) {
-      winMove = [];
-      winMove[0] = tempCol.indexOf('');
-      winMove[1] = l;
-      console.log("WINMOVE COL: " + winMove);
-    }
-    if (tempRow.indexOf('') >= 0 &&hasItem(tempRow,computer) === 2) {
-      winMove[0] = l;
-      winMove[1] = tempRow.indexOf(""); //index of the empty spot
-      console.log("WINMOVE ROW: " + winMove);
-    }
-    if (tempRow.indexOf('')>=0 && hasItem(tempRow,player) === 2 && winMove === []){
-      winMove[0] = l;
-      winMove[1] = tempRow.indexOf(""); //index of the empty spot
-      console.log("Preferred ROW: " + winMove);      
-    }
-    if (tempCol.indexOf('') >= 0 && hasItem(tempCol,player) === 2 && winMove === []) {
-      winMove = [];
-      winMove[0] = tempCol.indexOf('');
-      winMove[1] = l;
-      console.log("Preffered COL: " + winMove);
-    }
-
     if(vertScore == 3 || horScore == 3){
       pMatch = true;
     }
@@ -244,7 +292,6 @@ function isWin() {
 
     blankScore += hasItem(tempRow,"");
   }
-
 
   //do you win?
   if(pMatch || ldScore == 3 || luScore == 3){
@@ -264,37 +311,6 @@ function isWin() {
       setTimeout(function(){gameWin();},400);
     }
   }
-
-
-//diagnal winmoves and blocks
-    if (leftDown.indexOf('') >= 0 && hasItem(leftDown,computer) === 2) {
-      winMove = [];
-      winMove[0] = leftDown.indexOf('');
-      winMove[1] = leftDown.indexOf('');
-      console.log("winMove LD: " + winMove);
-    }
-    if (leftUp.indexOf('') >= 0 && hasItem(leftUp,computer) === 2) {
-      winMove = [];
-      winMove[0] = leftUp.length - leftUp.indexOf('') - 1;
-      winMove[1] = leftUp.indexOf('');
-      console.log("winMove LU: " + winMove);
-    }
-    if (leftUp.indexOf('') >= 0 && hasItem(leftUp,player) === 2 && winMove === []) {
-      winMove = [];
-      winMove[0] = leftUp.length - leftUp.indexOf('') - 1;
-      winMove[1] = leftUp.indexOf('');
-      console.log("Preferred LU: " + winMove);
-    }
-    if (leftDown.indexOf('') >= 0 && hasItem(leftDown,player) === 2 && winMove === []) {
-      winMove = [];
-      winMove[0] = leftDown.indexOf('');
-      winMove[1] = leftDown.indexOf('');
-      console.log("winMove LD: " + winMove);
-    }
-
-
-
-
 }
 
 });
